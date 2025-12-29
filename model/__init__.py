@@ -1,0 +1,16 @@
+from . import (
+    users,
+    subscription,
+    teams,
+    courses,
+    topics,
+    topic_completion,
+    questions,
+    enrolment,
+    hub,
+    instructors,
+    instructors_specialty,
+    bookings,
+    reviews,
+    study_plans,
+)

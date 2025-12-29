@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Booking Request - Brain Bridge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+            color: #374151;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .greeting {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+
+        .message {
+            color: #6b7280;
+            margin-bottom: 32px;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .info-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+
+        .info-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .info-card h3::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: #3b82f6;
+            border-radius: 2px;
+            margin-right: 8px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+        }
+
+        .session-card {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+
+        .session-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .session-card h3::before {
+            content: '📅';
+            margin-right: 8px;
+        }
+
+        .deadline-notice {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            padding: 16px;
+            margin: 24px 0;
+            text-align: center;
+        }
+
+        .deadline-text {
+            color: #92400e;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .action-section {
+            text-align: center;
+            margin-top: 32px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            text-align: center;
+            min-width: 140px;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+
+        .confirm-button {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+
+        .confirm-button:hover {
+            background: #059669;
+            border-color: #059669;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .cancel-button {
+            background: white;
+            color: #dc2626;
+            border-color: #dc2626;
+        }
+
+        .cancel-button:hover {
+            background: #dc2626;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        }
+
+        .footer {
+            background: #f8fafc;
+            padding: 24px 40px;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .footer p {
+            color: #64748b;
+            font-size: 12px;
+            margin: 4px 0;
+        }
+
+        .brand {
+            font-weight: 600;
+            color: #1e40af;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                margin: 10px;
+                border-radius: 8px;
+            }
+
+            .header {
+                padding: 24px 20px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .content {
+                padding: 24px 20px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .button {
+                width: 100%;
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Booking Request Received</h1>
+            <p>Please review and respond</p>
+        </div>
+
+        <div class="content">
+            <div class="greeting">Dear {{ instructor_name }},</div>
+
+            <div class="message">
+                You have received a new tutoring session booking request. A student is interested in scheduling a session with you. Please review the details below and let us know if you can accommodate this request.
+            </div>
+
+            <div class="info-card">
+                <h3>Student Details</h3>
+                <div class="info-row">
+                    <span class="info-label">Name:</span>
+                    <span class="info-value">{{ student_name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value">{{ student_email }}</span>
+                </div>
+            </div>
+
+            <div class="session-card">
+                <h3>Session Information</h3>
+                <div class="info-row">
+                    <span class="info-label">Date & Time:</span>
+                    <span class="info-value">{{ session_datetime }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Session Type:</span>
+                    <span class="info-value">{{ booking_type|title }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Duration:</span>
+                    <span class="info-value">{{ duration_hours }} hour{% if duration_hours != 1 %}s{% endif %}</span>
+                </div>
+            </div>
+
+            <div class="deadline-notice">
+                <p class="deadline-text">⏰ Please respond within 24 hours to confirm or decline this session request.</p>
+            </div>
+
+            <div class="action-section">
+                <div class="action-buttons">
+                    <a href="{{ confirm_url }}" class="button confirm-button">Confirm Session</a>
+                    <a href="{{ cancel_url }}" class="button cancel-button">Decline Session</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong class="brand">Brain Bridge</strong> - Professional Tutoring Platform</p>
+            <p>This is an automated booking notification • Please respond promptly</p>
+            <p>© {{ current_year }} Brain Bridge. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

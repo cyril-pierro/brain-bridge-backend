@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Rescheduled - Brain Bridge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 550px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #92400e 0%, #78350f 100%);
+            color: white;
+            padding: 50px 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="25" cy="25" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1.5" fill="rgba(255,255,255,0.08)"/><circle cx="50" cy="10" r="0.8" fill="rgba(255,255,255,0.12)"/></svg>');
+            opacity: 0.4;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 18px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .reschedule-message {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 1px solid #f59e0b;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 25px 0;
+            text-align: center;
+        }
+
+        .reschedule-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .reschedule-message h3 {
+            color: #92400e;
+            font-size: 20px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .reschedule-message p {
+            color: #92400e;
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .student-info {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+
+        .student-info h3 {
+            color: #1f2937;
+            font-size: 18px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .student-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .student-detail:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: #6b7280;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .session-details {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 1px solid #0ea5e9;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+
+        .session-details h3 {
+            color: #0c4a6e;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .session-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 8px 0;
+        }
+
+        .session-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .session-label {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .session-value {
+            font-weight: 600;
+            color: #1e40af;
+        }
+
+        .important-note {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 1px solid #f59e0b;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .important-note h3 {
+            color: #92400e;
+            font-size: 20px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .footer {
+            background: #f9fafb;
+            padding: 25px 40px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .footer p {
+            color: #6b7280;
+            font-size: 13px;
+            margin: 5px 0;
+        }
+
+        .brand {
+            font-weight: 600;
+            color: #92400e;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                margin: 10px;
+            }
+
+            .header {
+                padding: 35px 25px;
+            }
+
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .content {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Session Rescheduled</h1>
+            <p>A student has rescheduled their tutoring session</p>
+        </div>
+
+        <div class="content">
+            <div class="reschedule-message">
+                <div class="reschedule-icon">📅</div>
+                <h3>Session Rescheduled</h3>
+                <p>{{ student_name }} has rescheduled their tutoring session with you</p>
+            </div>
+
+            <div class="student-info">
+                <h3>Student Details</h3>
+                <div class="student-detail">
+                    <span class="detail-label">Name:</span>
+                    <span class="detail-value">{{ student_name }}</span>
+                </div>
+                <div class="student-detail">
+                    <span class="detail-label">Email:</span>
+                    <span class="detail-value">{{ student_email }}</span>
+                </div>
+            </div>
+
+            <div class="session-details">
+                <h3>Updated Session Details</h3>
+                <div class="session-item">
+                    <span class="session-label">New Date & Time:</span>
+                    <span class="session-value">{{ session_datetime }}</span>
+                </div>
+                <div class="session-item">
+                    <span class="session-label">Type:</span>
+                    <span class="session-value">{{ booking_type }}</span>
+                </div>
+                <div class="session-item">
+                    <span class="session-label">Duration:</span>
+                    <span class="session-value">{{ duration_hours }} hour{% if duration_hours != 1 %}s{% endif %}</span>
+                </div>
+            </div>
+
+            <div class="important-note">
+                <h3>Important Notice</h3>
+                <p style="color: #92400e; margin-bottom: 15px;">Please take note of the new session details above</p>
+                <p style="color: #92400e;">If you need to make any adjustments, please contact the student directly</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong class="brand">Brain Bridge</strong> - Online Tutoring Platform</p>
+            <p>This is an automated notification • Save this email for your records</p>
+            <p>© {{ current_year }} Brain Bridge. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

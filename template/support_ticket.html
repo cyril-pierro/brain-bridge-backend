@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Support Ticket - {{ ticket_id }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f3f4f6;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .ticket-info {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .ticket-id {
+            font-size: 18px;
+            font-weight: 700;
+            color: #dc2626;
+            margin-bottom: 10px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .priority-urgent {
+            background: #dc2626;
+            color: white;
+        }
+
+        .priority-high {
+            background: #ea580c;
+            color: white;
+        }
+
+        .priority-medium {
+            background: #d97706;
+            color: white;
+        }
+
+        .priority-low {
+            background: #65a30d;
+            color: white;
+        }
+
+        .message-section {
+            margin-top: 25px;
+        }
+
+        .message-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 12px;
+        }
+
+        .message-content {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            color: #374151;
+        }
+
+        .actions {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .action-button {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0 10px;
+            transition: background-color 0.2s;
+        }
+
+        .action-button:hover {
+            background: #2563eb;
+        }
+
+        .footer {
+            background: #f9fafb;
+            padding: 20px 30px;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+        }
+
+        .footer p {
+            color: #6b7280;
+            font-size: 12px;
+            margin: 5px 0;
+        }
+
+        .brand {
+            font-weight: 600;
+            color: #3b82f6;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                margin: 10px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions .action-button {
+                display: block;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>New Support Ticket</h1>
+            <p>Customer assistance requested</p>
+        </div>
+
+        <div class="content">
+            <div class="ticket-info">
+                <div class="ticket-id">Ticket #{{ ticket_id }}</div>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Customer</div>
+                        <div class="info-value">{{ customer_name }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Email</div>
+                        <div class="info-value">{{ customer_email }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Subject</div>
+                        <div class="info-value">{{ subject }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Priority</div>
+                        <div class="info-value">
+                            <span class="priority-badge priority-{{ priority|lower }}">{{ priority }}</span>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Submitted</div>
+                        <div class="info-value">{{ submitted_at }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Response Time</div>
+                        <div class="info-value">{{ estimated_response }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="message-section">
+                <div class="message-label">Customer Message:</div>
+                <div class="message-content">{{ message }}</div>
+            </div>
+
+            <div class="actions">
+                <a href="#" class="action-button">View in Dashboard</a>
+                <a href="mailto:{{ customer_email }}?subject=Re: {{ subject }} (Ticket {{ ticket_id }})" class="action-button">Reply to Customer</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong class="brand">Brain Bridge Support System</strong></p>
+            <p>This is an automated notification for support tickets</p>
+            <p>Please respond to customer inquiries promptly</p>
+        </div>
+    </div>
+</body>
+</html>

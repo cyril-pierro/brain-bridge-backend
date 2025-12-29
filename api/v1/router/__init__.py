@@ -1,0 +1,11 @@
+from .user import router as user
+from .teams import router as teams
+from .courses import router as courses
+from .quiz import router as quiz
+from .flashcards import router as flashcards
+from .enrolment import router as enrolment
+from .hub import router as hub
+from .instructors import router as instructors
+from .ai import router as ai
+from .reviews import router as reviews
+from .study_plans import router as study_plans

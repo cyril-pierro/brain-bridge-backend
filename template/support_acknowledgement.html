@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Request Received - {{ ticket_id }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="25" cy="25" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="45" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="55" cy="75" r="1.5" fill="rgba(255,255,255,0.1)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content {
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .content p {
+            color: #374151;
+            margin-bottom: 25px;
+            font-size: 16px;
+        }
+
+        .ticket-info {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 2px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .ticket-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #166534;
+            margin-bottom: 8px;
+        }
+
+        .ticket-label {
+            font-size: 14px;
+            color: #16a34a;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .response-info {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            text-align: left;
+        }
+
+        .response-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+
+        .response-text {
+            color: #475569;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .help-section {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            text-align: left;
+        }
+
+        .help-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .help-icon {
+            color: #d97706;
+            font-size: 18px;
+            margin-right: 8px;
+        }
+
+        .help-text {
+            color: #78350f;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .help-links {
+            margin-top: 15px;
+        }
+
+        .help-link {
+            display: inline-block;
+            background: #f59e0b;
+            color: #92400e;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0 8px 8px 0;
+            transition: background-color 0.2s;
+        }
+
+        .help-link:hover {
+            background: #d97706;
+            color: #78350f;
+        }
+
+        .footer {
+            background: #f9fafb;
+            padding: 25px 30px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .footer p {
+            color: #6b7280;
+            font-size: 13px;
+            margin: 5px 0;
+        }
+
+        .brand {
+            font-weight: 600;
+            color: #10b981;
+        }
+
+        .contact-info {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .contact-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+
+        .contact-detail {
+            font-size: 13px;
+            color: #64748b;
+            margin: 2px 0;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                margin: 10px;
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .content {
+                padding: 30px 20px;
+            }
+
+            .help-links .help-link {
+                display: block;
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Support Request Received</h1>
+            <p>We're here to help you succeed</p>
+        </div>
+
+        <div class="content">
+            <p>Hi {{ customer_name }},</p>
+
+            <p>Thank you for contacting Brain Bridge support. We've received your message and created a support ticket to ensure we address your concern promptly.</p>
+
+            <div class="ticket-info">
+                <div class="ticket-number">{{ ticket_id }}</div>
+                <div class="ticket-label">Your Ticket Reference</div>
+            </div>
+
+            <div class="response-info">
+                <div class="response-title">Expected Response Time</div>
+                <div class="response-text">
+                    Our support team will respond to your inquiry {{ estimated_response }}.
+                    You'll receive an email notification once we reply to your ticket.
+                </div>
+            </div>
+
+            <div class="help-section">
+                <div class="help-title">
+                    <span class="help-icon">💡</span>
+                    While you wait, you might find these helpful:
+                </div>
+                <div class="help-text">
+                    Check our Help Center for instant answers to common questions, or browse our learning resources to continue your studies.
+                </div>
+                <div class="help-links">
+                    <a href="#" class="help-link">Help Center</a>
+                    <a href="#" class="help-link">Learning Hub</a>
+                    <a href="#" class="help-link">Study Guides</a>
+                </div>
+            </div>
+
+            <div class="contact-info">
+                <div class="contact-title">Need immediate assistance?</div>
+                <div class="contact-detail">📧 Email: support@brainbridge.com</div>
+                <div class="contact-detail">💬 Live Chat: Available 9 AM - 6 PM EST</div>
+                <div class="contact-detail">📱 Response Time: Within {{ estimated_response }}</div>
+            </div>
+
+            <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">
+                If you have additional information or updates to your request, simply reply to this email.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p><strong class="brand">Brain Bridge Support Team</strong></p>
+            <p>This is an automated confirmation • Reference: {{ ticket_id }}</p>
+            <p>© {{ current_year }} Brain Bridge. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
