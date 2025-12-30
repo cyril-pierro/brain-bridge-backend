@@ -13,7 +13,7 @@ NOT_ALLOWED = "You are not authorized to access this route"
 
 
 @router.post("/learning-hub/{topic_id}", response_model=LearningHubOut)
-async def add_learning_hub(
+def add_learning_hub(
     topic_id: int,
     data: LearningHubIn,
     auth_data: dict = Depends(verify_access_token),
@@ -25,7 +25,7 @@ async def add_learning_hub(
 
 
 @router.get("/learning-hub/{video_id}", response_model=LearningHubOut)
-async def get_learning_hub(
+def get_learning_hub(
     video_id: int,
     auth_data: dict = Depends(verify_access_token),
 ):
@@ -39,7 +39,7 @@ async def get_learning_hub(
 
 
 @router.put("/learning-hub/{video_id}", response_model=LearningHubOut)
-async def update_learning_hub(
+def update_learning_hub(
     video_id: int,
     data: LearningHubIn,
     auth_data: dict = Depends(verify_access_token),
@@ -51,7 +51,7 @@ async def update_learning_hub(
 
 
 @router.delete("/learning-hub/{video_id}", response_model=SuccessOut)
-async def delete_learning_hub(
+def delete_learning_hub(
     video_id: int,
     auth_data: dict = Depends(verify_access_token),
 ):
@@ -63,7 +63,7 @@ async def delete_learning_hub(
 
 
 @router.get("/learning-hub", response_model=list[LearningHubVideoOut])
-async def get_all_videos_for_courses_enroled(
+def get_all_videos_for_courses_enroled(
     auth_data: dict = Depends(verify_access_token),
 ):
     user_id = auth_data.get("user_id", None)
@@ -73,7 +73,7 @@ async def get_all_videos_for_courses_enroled(
 
 
 @router.post("/learning-hub/{video_id}/like", response_model=dict)
-async def toggle_video_like(
+def toggle_video_like(
     video_id: int,
     auth_data: dict = Depends(verify_access_token),
 ):
@@ -84,7 +84,7 @@ async def toggle_video_like(
 
 
 @router.get("/learning-hub/{video_id}/like", response_model=dict)
-async def get_video_like_status(
+def get_video_like_status(
     video_id: int,
     auth_data: dict = Depends(verify_access_token),
 ):

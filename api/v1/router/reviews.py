@@ -9,7 +9,7 @@ router = APIRouter(tags=["Reviews"])
 
 
 @router.post("/reviews/{instructor_id}/booking/{booking_id}", response_model=ReviewOut)
-async def add_review_for_booking(
+def add_review_for_booking(
     instructor_id: str,
     booking_id: int,
     review_data: ReviewIn,
@@ -31,7 +31,7 @@ async def add_review_for_booking(
 
 
 @router.get("/reviews/instructor/{instructor_id}", response_model=list[ReviewOut])
-async def get_reviews_for_instructor(
+def get_reviews_for_instructor(
     instructor_id: str,
     auth_data: dict = Depends(verify_access_token),
 ):
@@ -44,7 +44,7 @@ async def get_reviews_for_instructor(
 
 
 @router.get("/reviews/my-reviews", response_model=list[ReviewOut])
-async def get_my_reviews(
+def get_my_reviews(
     auth_data: dict = Depends(verify_access_token),
 ):
     """
@@ -57,7 +57,7 @@ async def get_my_reviews(
 
 
 @router.get("/reviews/my-completed-bookings")
-async def get_completed_bookings_for_review(
+def get_completed_bookings_for_review(
     auth_data: dict = Depends(verify_access_token),
 ):
     """

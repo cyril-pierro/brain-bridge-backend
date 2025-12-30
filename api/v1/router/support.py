@@ -6,7 +6,7 @@ support_router = APIRouter(tags=["support"])
 
 
 @support_router.post("/support/contact", response_model=SuccessOut)
-async def submit_contact_form(
+def submit_contact_form(
     contact_data: ContactFormIn,
     background_tasks: BackgroundTasks
 ):

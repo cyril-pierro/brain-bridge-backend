@@ -15,7 +15,7 @@ NOT_ALLOWED = "You are not authorized to access this route"
 
 
 @router.post("/flashcards/{course_id}", response_model=FlashcardOut)
-async def add_flashcard(
+def add_flashcard(
     course_id: int,
     data: FlashcardIn,
     auth_data: dict = Depends(verify_access_token),
@@ -30,7 +30,7 @@ async def add_flashcard(
 
 
 @router.put("/flashcards/{flashcard_id}", response_model=FlashcardOut)
-async def update_flashcard(
+def update_flashcard(
     flashcard_id: int,
     data: FlashcardIn,
     auth_data: dict = Depends(verify_access_token),
@@ -45,7 +45,7 @@ async def update_flashcard(
 
 
 @router.delete("/flashcards/{flashcard_id}", response_model=SuccessOut)
-async def delete_flashcard(
+def delete_flashcard(
     flashcard_id: int,
     auth_data: dict = Depends(verify_access_token),
 ):
@@ -60,7 +60,7 @@ async def delete_flashcard(
 
 
 @router.get("/flashcards/{course_id}", response_model=list[FlashcardOut])
-async def get_flashcards_by_course_id(
+def get_flashcards_by_course_id(
     course_id: int,
     auth_data: dict = Depends(verify_access_token),
 ):

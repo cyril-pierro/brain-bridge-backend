@@ -12,7 +12,7 @@ NOT_ALLOWED = "You are not allowed to perform this action"
 
 
 @router.get("/enrolments", response_model=list[EnrolmentCourseOut])
-async def get_courses_enrolled_by_student(
+def get_courses_enrolled_by_student(
     auth_data: dict = Depends(verify_access_token),
 ):
     user_id = auth_data.get("user_id", None)
@@ -24,7 +24,7 @@ async def get_courses_enrolled_by_student(
 
 
 @router.post("/enrolments/{course_id}", response_model=EnrolmentCourseOut)
-async def enroll_a_student(
+def enroll_a_student(
     course_id: int,
     auth_data: dict = Depends(verify_access_token),
 ):
@@ -39,7 +39,7 @@ async def enroll_a_student(
 
 
 @router.delete("/enrolments/{enrolment_id}", response_model=SuccessOut)
-async def unenrol_a_student(
+def unenrol_a_student(
     enrolment_id: int,
     auth_data: dict = Depends(verify_access_token),
 ):
@@ -53,7 +53,7 @@ async def unenrol_a_student(
 
 
 @router.post("/enrolments/all/bulk", response_model=list[EnrolmentCourseOut])
-async def enroll_multiple_courses(
+def enroll_multiple_courses(
     data: EnrolmentCourseIn,
     auth_data: dict = Depends(verify_access_token),
 ):

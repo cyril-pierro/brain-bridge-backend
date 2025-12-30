@@ -17,7 +17,7 @@ NOT_ALLOWED = "You are not authorized to access this route"
 
 
 @router.post("/quiz/{course_id}", response_model=QuizQuestionOut)
-async def add_quiz_question(
+def add_quiz_question(
     course_id: int,
     data: QuizQuestionIn,
     auth_data: dict = Depends(verify_access_token),
@@ -29,7 +29,7 @@ async def add_quiz_question(
 
 
 @router.put("/quiz/{question_id}", response_model=QuizQuestionOut)
-async def update_quiz_question(
+def update_quiz_question(
     question_id: int,
     data: QuizQuestionIn,
     auth_data: dict = Depends(verify_access_token),
@@ -41,7 +41,7 @@ async def update_quiz_question(
 
 
 @router.delete("/quiz/{question_id}", response_model=SuccessOut)
-async def delete_quiz_question(
+def delete_quiz_question(
     question_id: int,
     auth_data: dict = Depends(verify_access_token),
 ):
@@ -53,7 +53,7 @@ async def delete_quiz_question(
 
 
 @router.get("/quiz/{course_id}", response_model=list[QuizQuestionOut])
-async def get_quiz_questions_by_course_id(
+def get_quiz_questions_by_course_id(
     course_id: int,
     auth_data: dict = Depends(verify_access_token),
 ):
@@ -67,7 +67,7 @@ async def get_quiz_questions_by_course_id(
 
 
 @router.post("/quiz/{question_id}/answer", response_model=QuizAnswerOut)
-async def add_quiz_answer(
+def add_quiz_answer(
     question_id: int,
     data: QuizAnswerIn,
     auth_data: dict = Depends(verify_access_token),
@@ -79,7 +79,7 @@ async def add_quiz_answer(
 
 
 @router.put("/quiz/{question_id}/answer", response_model=QuizAnswerOut)
-async def update_quiz_answer(
+def update_quiz_answer(
     answer_id: int,
     data: QuizAnswerIn,
     auth_data: dict = Depends(verify_access_token),
@@ -91,7 +91,7 @@ async def update_quiz_answer(
 
 
 @router.delete("/quiz/{answer_id}", response_model=SuccessOut)
-async def delete_quiz_answer(
+def delete_quiz_answer(
     answer_id: int,
     auth_data: dict = Depends(verify_access_token),
 ):

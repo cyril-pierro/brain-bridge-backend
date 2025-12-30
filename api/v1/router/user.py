@@ -28,7 +28,7 @@ router = APIRouter(tags=["users"])
 
 
 @router.post("/users/register", response_model=SuccessOut)
-async def register(user: SignUp, background_tasks: BackgroundTasks):
+def register(user: SignUp, background_tasks: BackgroundTasks):
     """
     Register a new user
     - Creates user account
@@ -51,7 +51,7 @@ async def register(user: SignUp, background_tasks: BackgroundTasks):
 
 
 @router.post("/users/otp/verify", response_model=SuccessOut)
-async def verify_user_registration_otp(data: SignUpOTP):
+def verify_user_registration_otp(data: SignUpOTP):
     """
     Verify user registration OTP
     - Validates OTP and marks user as verified
@@ -63,7 +63,7 @@ async def verify_user_registration_otp(data: SignUpOTP):
 
 
 @router.post("/users/otp/resend", response_model=SuccessOut)
-async def resend_otp(data: ResendOTP, background_task: BackgroundTasks):
+def resend_otp(data: ResendOTP, background_task: BackgroundTasks):
     """
     Resend OTP for user registration
     - Generates and sends new OTP
@@ -85,7 +85,7 @@ async def resend_otp(data: ResendOTP, background_task: BackgroundTasks):
 
 
 @router.post("/users/login", response_model=SignInOut)
-async def login(user: SignIn):
+def login(user: SignIn):
     """
     Authenticate and login a user
     - Validates user credentials
@@ -100,7 +100,7 @@ async def login(user: SignIn):
 
 
 @router.post("/auth/google", response_model=SignInOut)
-async def google_auth(auth_data: AuthRequest):
+def google_auth(auth_data: AuthRequest):
     """
     Exchanges the authorization code for a Google access token,
     fetches user info, and returns a local JWT.
@@ -157,7 +157,7 @@ async def google_auth(auth_data: AuthRequest):
 
 
 @router.post("/users/logout", response_model=SuccessOut)
-async def logout(auth_data: dict = Depends(verify_access_token)):
+def logout(auth_data: dict = Depends(verify_access_token)):
     """
     Logout user and clear all associated cache records
     - Requires authentication
@@ -187,7 +187,7 @@ async def logout(auth_data: dict = Depends(verify_access_token)):
 
 
 @router.get("/users/profile", response_model=UserOut)
-async def get_current_user(user: dict = Depends(verify_access_token)):
+def get_current_user(user: dict = Depends(verify_access_token)):
     """
     Get the current user's details
     - Requires authentication
@@ -198,7 +198,7 @@ async def get_current_user(user: dict = Depends(verify_access_token)):
 
 
 @router.put("/users/profile", response_model=UserOut)
-async def update_current_user(
+def update_current_user(
     user_data: UserUpdate,
     auth_data: dict = Depends(verify_access_token)
 ):
@@ -219,7 +219,7 @@ async def update_current_user(
 
 
 @router.put("/users/change-password", response_model=SuccessOut)
-async def change_password(
+def change_password(
     password_data: ChangePassword,
     auth_data: dict = Depends(verify_access_token)
 ):
@@ -239,7 +239,7 @@ async def change_password(
 
 
 @router.get("/users", response_model=list[UserOut])
-async def get_all_users(auth_data: dict = Depends(verify_access_token)):
+def get_all_users(auth_data: dict = Depends(verify_access_token)):
     """
     Get all users
     - Requires authentication
@@ -252,7 +252,7 @@ async def get_all_users(auth_data: dict = Depends(verify_access_token)):
 
 
 @router.get("/users/subscribe/{subscription_type}", response_model=SubscriptionOut)
-async def subscribe(
+def subscribe(
     subscription_type: SubscriptionType, token: dict = Depends(verify_access_token)
 ):
     """
@@ -285,7 +285,7 @@ async def subscribe(
 
 
 @router.get("/users/subscription", response_model=SubscriptionOut)
-async def get_subscription(token: dict = Depends(verify_access_token)):
+def get_subscription(token: dict = Depends(verify_access_token)):
     """
     Get a user's subscription
     - Validates user credentials

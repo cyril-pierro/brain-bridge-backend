@@ -23,7 +23,7 @@ NOT_ALLOWED = "You are not authorized to access this route"
 
 
 @router.post("/subjects", response_model=CourseOut)
-async def add_subject(
+def add_subject(
     data: CourseIn,
     auth_data: dict = Depends(verify_access_token),
 ):
@@ -38,7 +38,7 @@ async def add_subject(
 
 
 @router.put("/subjects/{subject_id}", response_model=CourseOut)
-async def update_subject(
+def update_subject(
     subject_id: int,
     data: CourseIn,
     auth_data: dict = Depends(verify_access_token),
@@ -54,7 +54,7 @@ async def update_subject(
 
 
 @router.delete("/subjects/{subject_id}", response_model=SuccessOut)
-async def delete_subject(
+def delete_subject(
     subject_id: int,
     auth_data: dict = Depends(verify_access_token),
 ):
@@ -71,7 +71,7 @@ async def delete_subject(
 
 
 @router.get("/subjects", response_model=list[CourseOut])
-async def get_subjects(
+def get_subjects(
     auth_data: dict = Depends(verify_access_token),
 ):
     user_id = auth_data.get("user_id", None)
@@ -95,7 +95,7 @@ async def get_subjects(
 
 
 @router.get("/subjects/{subject_id}", response_model=CourseOut)
-async def get_subject(
+def get_subject(
     subject_id: int,
     auth_data: dict = Depends(verify_access_token),
 ):
@@ -109,7 +109,7 @@ async def get_subject(
 
 
 @router.post("/subjects/{subject_id}/topics", response_model=TopicOut2)
-async def add_topic(
+def add_topic(
     subject_id: int,
     data: TopicIn,
     auth_data: dict = Depends(verify_access_token),
@@ -121,7 +121,7 @@ async def add_topic(
 
 
 @router.put("/topics/{topic_id}", response_model=TopicOut2)
-async def update_topic(
+def update_topic(
     topic_id: int,
     data: TopicIn,
     auth_data: dict = Depends(verify_access_token),
@@ -133,7 +133,7 @@ async def update_topic(
 
 
 @router.delete("/topics/{topic_id}", response_model=SuccessOut)
-async def delete_topic(
+def delete_topic(
     topic_id: int,
     auth_data: dict = Depends(verify_access_token),
 ):
@@ -145,7 +145,7 @@ async def delete_topic(
 
 
 @router.get("/topics/{subject_id}", response_model=list[TopicOut])
-async def get_topics(
+def get_topics(
     subject_id: int,
     auth_data: dict = Depends(verify_access_token),
 ):
@@ -156,7 +156,7 @@ async def get_topics(
 
 
 @router.get("/topics/{topic_id}/complete", response_model=SuccessOut)
-async def mark_topic_as_complete(
+def mark_topic_as_complete(
     topic_id: int,
     auth_data: dict = Depends(verify_access_token),
 ):
@@ -175,7 +175,7 @@ async def mark_topic_as_complete(
 
 
 @router.get("/topics/users/completed", response_model=list[CompletedCourseOut])
-async def get_user_topics_completed(
+def get_user_topics_completed(
     auth_data: dict = Depends(verify_access_token),
 ):
     user_id = auth_data.get("user_id", None)

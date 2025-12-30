@@ -36,7 +36,7 @@ def verify_booking_token(token: str, expected_booking_id: int) -> dict:
 
 
 @router.get("/instructors", response_model=list[InstructorOut])
-async def get_all_instructors(
+def get_all_instructors(
     auth_data: dict = Depends(verify_access_token),
 ):
     user_id = auth_data.get("user_id", None)
@@ -49,7 +49,7 @@ async def get_all_instructors(
 
 
 @router.post("/instructors", response_model=InstructorOut)
-async def add_instructor(
+def add_instructor(
     data: InstructorIn,
     auth_data: dict = Depends(verify_access_token),
 ):
@@ -72,7 +72,7 @@ def verify_instructors_details(
 
 
 @router.get("/instructors/{instructor_id}", response_model=InstructorOut)
-async def get_instructor(
+def get_instructor(
     instructor_id: UUID,
     auth_data: dict = Depends(verify_access_token),
 ):
@@ -83,7 +83,7 @@ async def get_instructor(
 
 
 @router.put("/instructors/{instructor_id}", response_model=InstructorOut)
-async def update_instructor(
+def update_instructor(
     instructor_id: UUID,
     data: InstructorIn,
     auth_data: dict = Depends(verify_access_token),
@@ -95,7 +95,7 @@ async def update_instructor(
 
 
 @router.delete("/instructors/{instructor_id}", response_model=SuccessOut)
-async def delete_instructor(
+def delete_instructor(
     instructor_id: UUID,
     auth_data: dict = Depends(verify_access_token),
 ):
@@ -110,7 +110,7 @@ async def delete_instructor(
     "/instructors/{instructor_id}/specialties/{course_id}",
     response_model=InstructorCourseSpecialtyOut,
 )
-async def add_instructor_specialty(
+def add_instructor_specialty(
     instructor_id: UUID,
     course_id: int,
     auth_data: dict = Depends(verify_access_token),
@@ -126,7 +126,7 @@ async def add_instructor_specialty(
 @router.delete(
     "/instructors/{instructor_id}/specialties/{course_id}", response_model=SuccessOut
 )
-async def delete_instructor_specialty(
+def delete_instructor_specialty(
     instructor_id: UUID,
     course_id: int,
     auth_data: dict = Depends(verify_access_token),

@@ -9,7 +9,7 @@ router = APIRouter(tags=["AI Assistant"])
 
 
 @router.post("/ai/ask", response_model=AIAnswerOut)
-async def ask_ai_question(
+def ask_ai_question(
     question_data: AIQuestionIn,
     auth_data: dict = Depends(verify_access_token),
 ):

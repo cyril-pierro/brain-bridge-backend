@@ -14,7 +14,7 @@ NOT_ALLOWED = "You are not authorized to access this route"
 
 
 @router.get("/teams", response_model=list[TeamOut])
-async def get_all_teams(auth_data: dict = Depends(verify_access_token)):
+def get_all_teams(auth_data: dict = Depends(verify_access_token)):
     user_id = auth_data.get("user_id", None)
     is_student = UserOp.is_user_role(
         user_id=user_id, role=UserRole.student.value)
@@ -27,7 +27,7 @@ async def get_all_teams(auth_data: dict = Depends(verify_access_token)):
 
 
 @router.get("/teams/{code}", response_model=TeamOut)
-async def get_team_by_code(code: str, auth_data: dict = Depends(verify_access_token)):
+def get_team_by_code(code: str, auth_data: dict = Depends(verify_access_token)):
     user_id = auth_data.get("user_id", None)
     if not UserOp.is_user_role(user_id=user_id, role=UserRole.student.value):
         raise error.AuthenticationError(msg=NOT_ALLOWED)
@@ -35,7 +35,7 @@ async def get_team_by_code(code: str, auth_data: dict = Depends(verify_access_to
 
 
 @router.delete("/teams/{team_id}", response_model=SuccessOut)
-async def delete_team_by_id(team_id: int, auth_data: dict = Depends(verify_access_token)):
+def delete_team_by_id(team_id: int, auth_data: dict = Depends(verify_access_token)):
     user_id = auth_data.get("user_id", None)
     is_student = UserOp.is_user_role(
         user_id=user_id, role=UserRole.student.value)
@@ -51,7 +51,7 @@ async def delete_team_by_id(team_id: int, auth_data: dict = Depends(verify_acces
 
 
 @router.post("/teams", response_model=TeamOut)
-async def create_team(
+def create_team(
     data: TeamIn,
     auth_data: dict = Depends(verify_access_token),
 ):
@@ -62,7 +62,7 @@ async def create_team(
 
 
 @router.get("/teams/{code}/join", response_model=SuccessOut)
-async def join_team(
+def join_team(
     code: str,
     background_tasks: BackgroundTasks,
     auth_data: dict = Depends(verify_access_token),
@@ -94,7 +94,7 @@ async def join_team(
 
 
 @router.get("/teams/{team_id}/pending-requests", response_model=list[TeamJoinRequestOut])
-async def get_pending_requests(
+def get_pending_requests(
     team_id: int,
     auth_data: dict = Depends(verify_access_token),
 ):
@@ -105,7 +105,7 @@ async def get_pending_requests(
 
 
 @router.post("/teams/join-requests/{request_id}/approve", response_model=SuccessOut)
-async def approve_join_request(
+def approve_join_request(
     request_id: int,
     background_tasks: BackgroundTasks,
     auth_data: dict = Depends(verify_access_token),
@@ -135,7 +135,7 @@ async def approve_join_request(
 
 
 @router.post("/teams/join-requests/{request_id}/deny", response_model=SuccessOut)
-async def deny_join_request(
+def deny_join_request(
     request_id: int,
     background_tasks: BackgroundTasks,
     auth_data: dict = Depends(verify_access_token),
@@ -164,7 +164,7 @@ async def deny_join_request(
 
 
 @router.delete("/teams/{team_id}/members/{user_id}", response_model=SuccessOut)
-async def remove_team_member(
+def remove_team_member(
     team_id: int,
     user_id: str,
     background_tasks: BackgroundTasks,
@@ -179,7 +179,7 @@ async def remove_team_member(
 
 
 @router.get("/teams/{code}/add/{token}", response_model=SuccessOut)
-async def add_user_to_team(
+def add_user_to_team(
     code: str,
     token: str,
 ):
