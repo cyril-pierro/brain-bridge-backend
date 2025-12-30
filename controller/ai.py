@@ -14,6 +14,7 @@ except ImportError:
                 pass
             def invoke(self, query):
                 return []
+import httpx
 from schema.ai import AIQuestionIn, AIAnswerOut
 from config.setting import settings
 from datetime import datetime
@@ -162,3 +163,58 @@ Helpful Answer:"""
             return enhanced
 
         return original_answer
+
+    @staticmethod
+    async def ask_ai_async(question_data: AIQuestionIn) -> AIAnswerOut:
+        """Async version of ask_ai for better performance with external APIs"""
+        ai_instance = AIOp()
+
+        try:
+            # Prepare the context
+            context = question_data.context or "No specific context provided"
+
+            # First, try to get answer from the AI (async)
+            answer = await ai_instance.chain.ainvoke({
+                "question": question_data.question,
+                "context": context
+            })
+
+            # Basic confidence scoring based on answer length and content
+            confidence_score = ai_instance._calculate_confidence(answer)
+
+            # If confidence is low, try to search for additional information (async)
+            sources = []
+            if confidence_score < 0.6:
+                try:
+                    # Use invoke for now as ainvoke might not be available
+                    search_results = ai_instance.search_tool.invoke({
+                        "query": question_data.question
+                    })
+                    sources = [result.get("url", "") for result in search_results if result.get("url")]
+                    if sources:
+                        # Enhance answer with search context if available
+                        enhanced_answer = ai_instance._enhance_answer_with_search(answer, search_results)
+                        if enhanced_answer != answer:
+                            answer = enhanced_answer
+                            confidence_score = min(confidence_score + 0.2, 1.0)
+                except Exception as e:
+                    logger.warning(f"Search tool failed: {e}")
+
+            return AIAnswerOut(
+                question=question_data.question,
+                answer=answer,
+                confidence_score=confidence_score,
+                sources=sources,
+                generated_at=datetime.now()
+            )
+
+        except Exception as e:
+            logger.error(f"AI question processing failed: {e}")
+            # Fallback response
+            return AIAnswerOut(
+                question=question_data.question,
+                answer="I'm sorry, I encountered an error while processing your question. Please try rephrasing your question or contact support if the issue persists.",
+                confidence_score=0.0,
+                sources=[],
+                generated_at=datetime.now()
+            )

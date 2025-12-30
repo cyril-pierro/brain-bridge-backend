@@ -1,5 +1,5 @@
 import error
-import requests
+import httpx
 from schema.users import (
     SignUp,
     SignIn,
@@ -100,7 +100,7 @@ def login(user: SignIn):
 
 
 @router.post("/auth/google", response_model=SignInOut)
-def google_auth(auth_data: AuthRequest):
+async def google_auth(auth_data: AuthRequest):
     """
     Exchanges the authorization code for a Google access token,
     fetches user info, and returns a local JWT.
@@ -115,23 +115,24 @@ def google_auth(auth_data: AuthRequest):
         "grant_type": "authorization_code",
     }
 
-    response = requests.post(token_url, data=data)
-    if response.status_code != 200:
-        raise HTTPException(status_code=400, detail="Failed to exchange code")
+    async with httpx.AsyncClient() as client:
+        response = await client.post(token_url, data=data)
+        if response.status_code != 200:
+            raise HTTPException(status_code=400, detail="Failed to exchange code")
 
-    google_tokens = response.json()
-    access_token = google_tokens.get("access_token")
+        google_tokens = response.json()
+        access_token = google_tokens.get("access_token")
 
-    # 2. Get user info from Google
-    user_info_url = "https://www.googleapis.com/oauth2/v3/userinfo"
-    user_info_res = requests.get(user_info_url, headers={
-                                 "Authorization": f"Bearer {access_token}"})
+        # 2. Get user info from Google
+        user_info_url = "https://www.googleapis.com/oauth2/v3/userinfo"
+        user_info_res = await client.get(user_info_url, headers={
+                                         "Authorization": f"Bearer {access_token}"})
 
-    if user_info_res.status_code != 200:
-        raise HTTPException(
-            status_code=400, detail="Failed to fetch user info")
+        if user_info_res.status_code != 200:
+            raise HTTPException(
+                status_code=400, detail="Failed to fetch user info")
 
-    user_info = user_info_res.json()
+        user_info = user_info_res.json()
 
     # 3. Handle User in Database
     user = UserOp.get_or_create_oauth_user(user_info, "google")
@@ -143,7 +144,7 @@ def google_auth(auth_data: AuthRequest):
     )
 
     # Store token in Redis with same expiry as token
-    redis_instance.set(
+    await redis_instance.set(
         f"token-{user.id}",
         local_token,
         expiry=settings.USER_LOGIN_EXPIRE_SECONDS * 60,

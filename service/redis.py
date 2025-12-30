@@ -1,4 +1,5 @@
 import redis
+import aioredis
 import json
 import functools
 from typing import Any, Optional, Union, Callable
@@ -98,6 +99,85 @@ class Redis:
         """Get time to live for a key"""
         with handle_redis_error(f"getting TTL for key {key}"):
             return self.redis_client.ttl(key)
+
+
+class AsyncRedis:
+    """Async Redis client using aioredis"""
+    _instance = None
+    redis_client = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(AsyncRedis, cls).__new__(cls)
+            cls._instance._initialize()
+        return cls._instance
+
+    async def _initialize(self):
+        """Initialize async Redis client"""
+        if not self.redis_client:
+            self.redis_client = aioredis.from_url(
+                f"redis://:{settings.REDIS_PASSWORD}@{settings.REDIS_HOST}:{settings.REDIS_PORT}/{settings.REDIS_DB}"
+                if settings.REDIS_PASSWORD else
+                f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}/{settings.REDIS_DB}",
+                decode_responses=True,
+                max_connections=20,
+            )
+
+    async def set(self, key, value, expiry=None):
+        """Set key-value pair in Redis with optional expiry"""
+        if not self.redis_client:
+            await self._initialize()
+        with handle_redis_error(f"setting key {key}"):
+            return await self.redis_client.set(key, value, ex=expiry)
+
+    async def get(self, key):
+        """Get value for given key from Redis"""
+        if not self.redis_client:
+            await self._initialize()
+        with handle_redis_error(f"getting key {key}"):
+            return await self.redis_client.get(key)
+
+    async def delete(self, key):
+        """Delete key from Redis"""
+        if not self.redis_client:
+            await self._initialize()
+        with handle_redis_error(f"deleting key {key}"):
+            return await self.redis_client.delete(key)
+
+    async def exists(self, key):
+        """Check if key exists in Redis"""
+        if not self.redis_client:
+            await self._initialize()
+        with handle_redis_error(f"checking existence of key {key}"):
+            return await self.redis_client.exists(key)
+
+    async def set_json(self, key: str, data: Any, expiry: Optional[int] = None) -> bool:
+        """Set JSON data in Redis with optional expiry"""
+        if not self.redis_client:
+            await self._initialize()
+        with handle_redis_error(f"setting JSON key {key}"):
+            return await self.redis_client.set(key, json.dumps(data), ex=expiry)
+
+    async def get_json(self, key: str) -> Optional[Any]:
+        """Get JSON data from Redis"""
+        if not self.redis_client:
+            await self._initialize()
+        with handle_redis_error(f"getting JSON key {key}"):
+            data = await self.redis_client.get(key)
+            return json.loads(data) if data else None
+
+    async def expire(self, key: str, seconds: int) -> bool:
+        """Set expiry on a key"""
+        if not self.redis_client:
+            await self._initialize()
+        with handle_redis_error(f"setting expiry on key {key}"):
+            return await self.redis_client.expire(key, seconds)
+
+    async def close(self):
+        """Close Redis connection"""
+        if self.redis_client:
+            with handle_redis_error("closing Redis connection"):
+                await self.redis_client.close()
 
 
 # Caching decorator for API responses

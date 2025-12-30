@@ -1,5 +1,6 @@
 from typing import Any
 from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import QueuePool
@@ -40,6 +41,17 @@ class DatabaseSetup:
         self._session_maker = sessionmaker(
             bind=self._engine, autocommit=False, autoflush=False, expire_on_commit=False
         )
+
+        # Async engine setup for PostgreSQL
+        async_engine_kwargs = {
+            "echo": settings.TESTING,
+            "pool_pre_ping": True,
+        }
+        self._async_engine = create_async_engine(
+            settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://"),
+            **async_engine_kwargs
+        )
+
         self._base = declarative_base()
 
     def get_session(self) -> sessionmaker:

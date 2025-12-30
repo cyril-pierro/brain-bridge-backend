@@ -6,10 +6,11 @@ from sqlalchemy.orm import joinedload
 from model.study_plans import StudyPlan, DailyStudySession, DayOfWeek
 from model.courses import Course
 from util.enum import SubjectType
-from core.db import CreateDBSession
-from service.redis import Redis
+from core.db import CreateAsyncDBSession
+from service.redis import AsyncRedis
+from sqlalchemy import select
 
-redis_instance = Redis()
+async_redis_instance = AsyncRedis()
 
 
 class StudyPlanService:
@@ -81,14 +82,16 @@ class StudyPlanService:
         ]
 
     @staticmethod
-    def generate_study_plan(user_id: UUID, data) -> StudyPlan:
+    async def generate_study_plan_async(user_id: UUID, data) -> StudyPlan:
         # 1. OPTIMIZED FETCH:
         # We explicitly join only Topics. We ignore 'flashcards' and 'quiz_questions'
         # to keep the memory footprint small.
-        with CreateDBSession() as session:
-            courses = session.query(Course).options(
+        async with CreateAsyncDBSession() as session:
+            stmt = select(Course).options(
                 joinedload(Course.topics)
-            ).filter(Course.id.in_(data.selected_subjects)).all()
+            ).filter(Course.id.in_(data.selected_subjects))
+            result = await session.execute(stmt)
+            courses = result.scalars().all()
 
         categorized = StudyPlanService.categorize_subjects(courses)
         strengths = {s.course_id: s.strength for s in data.strength_ratings}
@@ -100,10 +103,10 @@ class StudyPlanService:
         week_start = date.today() - timedelta(days=date.today().weekday())
 
         # 2. BULK TRANSACTION
-        with CreateDBSession() as session:
+        async with CreateAsyncDBSession() as session:
             study_plan = StudyPlan(user_id=user_id, week_start_date=week_start)
             session.add(study_plan)
-            session.flush()
+            await session.flush()
 
             daily_sessions = []
             for day, course in allocation.items():
@@ -132,33 +135,37 @@ class StudyPlanService:
                     ))
 
             session.add_all(daily_sessions)
-            session.commit()
+            await session.commit()
             return study_plan
 
     @staticmethod
-    def swap_days(user_id: UUID, from_day: DayOfWeek, to_day: DayOfWeek) -> bool:
+    async def swap_days_async(user_id: UUID, from_day: DayOfWeek, to_day: DayOfWeek) -> bool:
         """
-        Optimized Swap: Fetches only the two relevant sessions and swaps them 
+        Optimized Swap: Fetches only the two relevant sessions and swaps them
         in one transaction to minimize DB overhead.
         """
         # Calculate current week start
         week_start = date.today() - timedelta(days=date.today().weekday())
 
-        with CreateDBSession() as session:
+        async with CreateAsyncDBSession() as session:
             # 1. Find the plan ID first
-            plan_id = session.query(StudyPlan.id).filter(
+            stmt = select(StudyPlan.id).filter(
                 StudyPlan.user_id == user_id,
                 StudyPlan.week_start_date == week_start
-            ).scalar()
+            )
+            result = await session.execute(stmt)
+            plan_id = result.scalar_one_or_none()
 
             if not plan_id:
                 return False
 
             # 2. Fetch both sessions in ONE query using the 'in_' operator
-            sessions = session.query(DailyStudySession).filter(
+            stmt = select(DailyStudySession).filter(
                 DailyStudySession.study_plan_id == plan_id,
                 DailyStudySession.day_of_week.in_([from_day, to_day])
-            ).all()
+            )
+            result = await session.execute(stmt)
+            sessions = result.scalars().all()
 
             # 3. Ensure we have both sessions to perform a swap
             if len(sessions) == 2:
@@ -166,7 +173,7 @@ class StudyPlanService:
                 sessions[0].day_of_week, sessions[1].day_of_week = \
                     sessions[1].day_of_week, sessions[0].day_of_week
 
-                session.commit()
+                await session.commit()
                 return True
 
             return False

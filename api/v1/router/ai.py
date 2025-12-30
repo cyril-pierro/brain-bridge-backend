@@ -9,7 +9,7 @@ router = APIRouter(tags=["AI Assistant"])
 
 
 @router.post("/ai/ask", response_model=AIAnswerOut)
-def ask_ai_question(
+async def ask_ai_question(
     question_data: AIQuestionIn,
     auth_data: dict = Depends(verify_access_token),
 ):
@@ -26,6 +26,6 @@ def ask_ai_question(
         from error import AuthenticationError
         raise AuthenticationError(msg="Only students can use the AI assistant")
 
-    # Process the AI question
-    result = AIOp.ask_ai(question_data)
+    # Process the AI question (async)
+    result = await AIOp.ask_ai_async(question_data)
     return result
