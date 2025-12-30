@@ -9,3 +9,5 @@ from .instructors import router as instructors
 from .ai import router as ai
 from .reviews import router as reviews
 from .study_plans import router as study_plans
+from .chat import router as chat
+from .files import router as files

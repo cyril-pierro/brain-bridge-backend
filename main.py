@@ -18,6 +18,8 @@ from api.v1.router import (
     ai,
     reviews,
     study_plans,
+    chat,
+    files,
 )
 from api.v1.router.support import support_router
 from core.setup import Base, database
@@ -101,6 +103,8 @@ app.include_router(instructors, prefix=settings.API_PREFIX)
 app.include_router(ai, prefix=settings.API_PREFIX)
 app.include_router(reviews, prefix=settings.API_PREFIX)
 app.include_router(study_plans, prefix=settings.API_PREFIX)
+app.include_router(chat, prefix=settings.API_PREFIX)
+app.include_router(files, prefix=settings.API_PREFIX)
 app.include_router(support_router, prefix=settings.API_PREFIX)
 
 

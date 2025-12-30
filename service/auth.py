@@ -116,3 +116,13 @@ def verify_access_token(token: str = Depends(bearerschema)) -> Dict[str, Any]:
     redis_instance.set_json(cache_key, payload, expiry=300)
 
     return payload
+
+
+def verify_access_token_ws(token: str) -> Dict[str, Any]:
+    """
+    Verify access token for WebSocket connections (without FastAPI dependency injection)
+    """
+    try:
+        return TokenManager.decode_token(token)
+    except Exception as e:
+        raise error.AuthenticationError("Invalid WebSocket authentication token")
