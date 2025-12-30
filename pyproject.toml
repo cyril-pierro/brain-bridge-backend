@@ -10,8 +10,7 @@ python = "^3.9"
 fastapi = "^0.121.2"
 pydantic-settings = "2.0.3"
 authlib = "^1.6.5"
-redis = "^7.0.1"
-aioredis = "^2.0.1"
+redis = {extras = ["hiredis"], version = "^5.0.1"}
 fastapi-mail = "1.4.1"
 sqlalchemy = {extras = ["asyncio"], version = "^2.0.44"}
 asyncpg = "^0.29.0"
