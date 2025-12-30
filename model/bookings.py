@@ -38,8 +38,8 @@ class InstructorBooking(Base):
     meeting_link = Column(String(500), nullable=True)
 
     # Relationships
-    user = relationship("User", back_populates="bookings", lazy="joined")
-    instructor = relationship("Instructor", back_populates="booked_sessions", lazy="joined")
+    user = relationship("User", back_populates="bookings", lazy="selectin")
+    instructor = relationship("Instructor", back_populates="booked_sessions", lazy="selectin")
     # course = relationship("Course")
 
     def save(self) -> "InstructorBooking":

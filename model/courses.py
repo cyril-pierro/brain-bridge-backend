@@ -19,23 +19,23 @@ class Course(Base):
 
     # Relationships
     enrolments = relationship(
-        "Enrolment", back_populates="course", lazy="joined")
+        "Enrolment", back_populates="course", lazy="selectin")
     flashcards = relationship(
         "Flashcard",  # The name of the related model
         back_populates="course",  # The property name on the Flashcard model
-        lazy="joined",
+        lazy="selectin",
     )
     quiz_questions = relationship(
         "QuizQuestion",  # The name of the related model
         back_populates="course",  # The property name on the Flashcard model
-        lazy="joined",
+        lazy="selectin",
     )
     # OPTIMIZED: Topics relationship is now explicitly ordered by the 'order' column.
     topics = relationship(
-        "Topic", back_populates="course", order_by="Topic.order", lazy="joined"
+        "Topic", back_populates="course", order_by="Topic.order", lazy="selectin"
     )
     specialty_instructors = relationship(
-        "InstructorCourseSpecialty", back_populates="course", lazy="joined"
+        "InstructorCourseSpecialty", back_populates="course", lazy="selectin"
     )
 
     def __repr__(self):

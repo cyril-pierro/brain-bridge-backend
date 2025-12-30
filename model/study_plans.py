@@ -25,7 +25,7 @@ class StudyPlan(Base):
     created_at = Column(Date, default=date.today)
     updated_at = Column(Date, default=date.today, onupdate=date.today)
 
-    # Relationships - Removed lazy="joined" to handle it explicitly in queries for better control
+    # Relationships - Removed lazy="selectin" to handle it explicitly in queries for better control
     daily_sessions = relationship(
         "DailyStudySession",
         back_populates="study_plan",

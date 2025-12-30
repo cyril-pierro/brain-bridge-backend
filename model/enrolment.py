@@ -18,7 +18,7 @@ class Enrolment(Base):
 
     # Relationships
     user = relationship("User", back_populates="enrolments")
-    course = relationship("Course", back_populates="enrolments", lazy="joined")
+    course = relationship("Course", back_populates="enrolments", lazy="selectin")
 
     # Constraint: Ensures a user can only enrol in a specific course once
     __table_args__ = (UniqueConstraint("user_id", "course_id", name="_user_course_uc"),)

@@ -22,8 +22,8 @@ class TeamJoinRequest(Base):
     status = Column(Enum(JoinRequestStatus), default=JoinRequestStatus.pending)
 
     # Relationships
-    team = relationship("Team", back_populates="join_requests", lazy="joined")
-    user = relationship("User", back_populates="join_requests", lazy="joined")
+    team = relationship("Team", back_populates="join_requests", lazy="selectin")
+    user = relationship("User", back_populates="join_requests", lazy="selectin")
 
     def save(self) -> "TeamJoinRequest":
         with CreateDBSession() as db:
@@ -85,10 +85,10 @@ class Team(Base):
     # Relationships
     # Students associated with this team
     students = relationship("User", back_populates="team",
-                            foreign_keys="User.team_id", lazy="joined")
+                            foreign_keys="User.team_id", lazy="selectin")
     creator = relationship(
         "User", back_populates="created_teams", foreign_keys=[creator_id],
-        lazy="joined"
+        lazy="selectin"
     )
     join_requests = relationship("TeamJoinRequest", back_populates="team", cascade="all, delete-orphan")
 

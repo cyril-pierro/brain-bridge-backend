@@ -10,7 +10,7 @@ from service.study_plans import StudyPlanService
 from model.study_plans import StudyPlan, DailyStudySession, SubjectStrength
 from util.serialize import serialize_data
 from core.db import CreateAsyncDBSession
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy import select
 from service.redis import AsyncRedis
 from datetime import datetime
@@ -62,9 +62,9 @@ class StudyPlanController:
 
         async with CreateAsyncDBSession() as session:
             stmt = select(StudyPlan).options(
-                joinedload(StudyPlan.daily_sessions).joinedload(
+                selectinload(StudyPlan.daily_sessions).selectinload(
                     DailyStudySession.course),
-                joinedload(StudyPlan.daily_sessions).joinedload(
+                selectinload(StudyPlan.daily_sessions).selectinload(
                     DailyStudySession.topic)
             ).filter(
                 StudyPlan.user_id == UUID(user_id),
@@ -72,7 +72,7 @@ class StudyPlanController:
             )
 
             result = await session.execute(stmt)
-            plan = result.scalar_one_or_none()
+            plan = result.unique().scalar_one_or_none()
 
         if not plan:
             raise HTTPException(
@@ -90,14 +90,13 @@ class StudyPlanController:
 
         async with CreateAsyncDBSession() as session:
             stmt = select(StudyPlan).options(
-                joinedload(StudyPlan.daily_sessions).joinedload(
+                selectinload(StudyPlan.daily_sessions).selectinload(
                     DailyStudySession.course),
-                joinedload(StudyPlan.daily_sessions).joinedload(
+                selectinload(StudyPlan.daily_sessions).selectinload(
                     DailyStudySession.topic)
             ).filter(StudyPlan.user_id == UUID(user_id)).order_by(StudyPlan.id.desc()).limit(1)
-
             result = await session.execute(stmt)
-            plan = result.scalar_one_or_none()
+            plan = result.unique().scalar_one_or_none()
 
         mapped_result = StudyPlanController._map_plan(plan)
         if mapped_result:
@@ -114,14 +113,14 @@ class StudyPlanController:
 
         async with CreateAsyncDBSession() as session:
             stmt = select(StudyPlan).options(
-                joinedload(StudyPlan.daily_sessions).joinedload(
+                selectinload(StudyPlan.daily_sessions).selectinload(
                     DailyStudySession.course),
-                joinedload(StudyPlan.daily_sessions).joinedload(
+                selectinload(StudyPlan.daily_sessions).selectinload(
                     DailyStudySession.topic)
             ).filter(StudyPlan.user_id == UUID(user_id))
 
             result = await session.execute(stmt)
-            plans = result.scalars().all()
+            plans = result.unique().scalars().all()
 
         mapped_results = [StudyPlanController._map_plan(p) for p in plans]
         await async_redis_instance.set_json(
@@ -181,7 +180,7 @@ class StudyPlanController:
             stmt = select(StudyPlan).filter_by(
                 id=plan_id, user_id=UUID(user_id))
             result = await session.execute(stmt)
-            plan = result.scalar_one_or_none()
+            plan = result.unique().scalar_one_or_none()
             if not plan:
                 raise HTTPException(status_code=404, detail="Plan not found")
             await session.delete(plan)
@@ -196,9 +195,9 @@ class StudyPlanController:
         """Fetches a specific plan by ID, verifying ownership."""
         async with CreateAsyncDBSession() as session:
             stmt = select(StudyPlan).options(
-                joinedload(StudyPlan.daily_sessions).joinedload(
+                selectinload(StudyPlan.daily_sessions).selectinload(
                     DailyStudySession.course),
-                joinedload(StudyPlan.daily_sessions).joinedload(
+                selectinload(StudyPlan.daily_sessions).selectinload(
                     DailyStudySession.topic)
             ).filter(
                 StudyPlan.id == plan_id,
@@ -206,7 +205,7 @@ class StudyPlanController:
             )
 
             result = await session.execute(stmt)
-            plan = result.scalar_one_or_none()
+            plan = result.unique().scalar_one_or_none()
 
         if not plan:
             raise HTTPException(status_code=404, detail="Study plan not found")

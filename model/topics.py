@@ -21,11 +21,11 @@ class Topic(Base):
     order = Column(Integer, nullable=False)
 
     # Relationships
-    course = relationship("Course", back_populates="topics", lazy="joined")
+    course = relationship("Course", back_populates="topics", lazy="selectin")
     user_completions = relationship(
-        "UserTopicCompletion", back_populates="topic", lazy="joined")
+        "UserTopicCompletion", back_populates="topic", lazy="selectin")
 
-    video_resources = relationship("VideoResource", back_populates="topic", lazy="joined")
+    video_resources = relationship("VideoResource", back_populates="topic", lazy="selectin")
 
     # Constraint: Ensures the 'order' is unique within the context of a single course
     __table_args__ = (

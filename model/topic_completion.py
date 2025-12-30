@@ -22,7 +22,7 @@ class UserTopicCompletion(Base):
 
     # Relationships
     user = relationship("User", back_populates="topic_completions")
-    topic = relationship("Topic", back_populates="user_completions", lazy="joined")
+    topic = relationship("Topic", back_populates="user_completions", lazy="selectin")
 
     # Constraint: Ensures a user can only have one completion record per topic
     __table_args__ = (

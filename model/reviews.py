@@ -41,12 +41,12 @@ class Review(Base):
     # Relationships
     reviewer = relationship(
         "User", back_populates="reviews_given", foreign_keys=[reviewer_user_id],
-        lazy="joined"
+        lazy="selectin"
     )
     reviewed_instructor = relationship(
         "Instructor",
         back_populates="reviews_received",
-        lazy="joined",
+        lazy="selectin",
         foreign_keys=[reviewed_instructor_id],
     )
     course = relationship("Course")  # To access details of the course, if provided

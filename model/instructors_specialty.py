@@ -15,9 +15,9 @@ class InstructorCourseSpecialty(Base):
     course_id = Column(Integer, ForeignKey("courses.id"), primary_key=True)
 
     # Relationships (not strictly necessary but good practice)
-    instructor = relationship("Instructor", back_populates="specialties", lazy="joined")
+    instructor = relationship("Instructor", back_populates="specialties", lazy="selectin")
     course = relationship(
-        "Course", back_populates="specialty_instructors", lazy="joined"
+        "Course", back_populates="specialty_instructors", lazy="selectin"
     )
 
     def save(self) -> "InstructorCourseSpecialty":

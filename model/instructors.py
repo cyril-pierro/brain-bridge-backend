@@ -37,7 +37,7 @@ class Instructor(Base):
         "User",
         back_populates="instructor_profile",
         uselist=False,
-        lazy="joined",
+        lazy="selectin",
         cascade="all, delete-orphan",
         single_parent=True,
     )
@@ -46,20 +46,20 @@ class Instructor(Base):
     specialties = relationship(
         "InstructorCourseSpecialty",
         back_populates="instructor",
-        lazy="joined",
+        lazy="selectin",
         cascade="all, delete-orphan",
     )
 
     reviews_received = relationship(
         "Review",
         back_populates="reviewed_instructor",
-        lazy="joined",
+        lazy="selectin",
         cascade="all, delete-orphan",
     )
     booked_sessions = relationship(
         "InstructorBooking",
         back_populates="instructor",
-        lazy="joined",
+        lazy="selectin",
         cascade="all, delete-orphan",
     )
 

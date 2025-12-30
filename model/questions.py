@@ -92,11 +92,11 @@ class QuizQuestion(Base):
     question_text = Column(Text, nullable=False)
 
     # Updated relationship to Course
-    course = relationship("Course", back_populates="quiz_questions", lazy="joined")
+    course = relationship("Course", back_populates="quiz_questions", lazy="selectin")
     answers = relationship(
         "QuizAnswer",
         back_populates="question",
-        lazy="joined",
+        lazy="selectin",
         cascade="all, delete-orphan",
     )
 
