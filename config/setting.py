@@ -4,6 +4,7 @@ from pydantic import EmailStr
 
 class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./sql_app.db"
+    DATABASE_URL_ASYNC: str = "sqlite+aiosqlite:///./sql_app.db"
     API_PREFIX: str = "/api/v1"
     TESTING: bool = True
     REDIS_HOST: str = "localhost"

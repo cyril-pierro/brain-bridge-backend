@@ -48,7 +48,7 @@ class DatabaseSetup:
             "pool_pre_ping": True,
         }
         self._async_engine = create_async_engine(
-            settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://"),
+            settings.DATABASE_URL_ASYNC,
             **async_engine_kwargs
         )
 
