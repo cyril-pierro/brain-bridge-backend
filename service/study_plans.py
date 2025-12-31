@@ -1,7 +1,7 @@
 from typing import List, Dict, Union
 from uuid import UUID
 from datetime import date, timedelta
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import selectinload
 
 from model.study_plans import StudyPlan, DailyStudySession, DayOfWeek
 from model.courses import Course
@@ -88,8 +88,9 @@ class StudyPlanService:
         # to keep the memory footprint small.
         async with CreateAsyncDBSession() as session:
             stmt = select(Course).options(
-                joinedload(Course.topics)
+                selectinload(Course.topics)
             ).filter(Course.id.in_(data.selected_subjects))
+
             result = await session.execute(stmt)
             courses = result.scalars().all()
 

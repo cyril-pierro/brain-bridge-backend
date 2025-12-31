@@ -89,12 +89,18 @@ class StudyPlanController:
             return StudyPlanOut(**cached)
 
         async with CreateAsyncDBSession() as session:
-            stmt = select(StudyPlan).options(
-                selectinload(StudyPlan.daily_sessions).selectinload(
-                    DailyStudySession.course),
-                selectinload(StudyPlan.daily_sessions).selectinload(
-                    DailyStudySession.topic)
-            ).filter(StudyPlan.user_id == UUID(user_id)).order_by(StudyPlan.id.desc()).limit(1)
+            stmt = (
+                select(StudyPlan)
+                .options(
+                    selectinload(StudyPlan.daily_sessions).selectinload(
+                        DailyStudySession.course),
+                    selectinload(StudyPlan.daily_sessions).selectinload(
+                        DailyStudySession.topic)
+                )
+                .filter(StudyPlan.user_id == UUID(user_id))
+                .order_by(StudyPlan.id.desc())
+                .limit(1)
+            )
             result = await session.execute(stmt)
             plan = result.unique().scalar_one_or_none()
 
@@ -180,7 +186,7 @@ class StudyPlanController:
             stmt = select(StudyPlan).filter_by(
                 id=plan_id, user_id=UUID(user_id))
             result = await session.execute(stmt)
-            plan = result.unique().scalar_one_or_none()
+            plan = result.scalar_one_or_none()
             if not plan:
                 raise HTTPException(status_code=404, detail="Plan not found")
             await session.delete(plan)
