@@ -1,3 +1,4 @@
+from typing import List, Dict, Any
 from model.reviews import Review
 from model.bookings import InstructorBooking
 from schema.reviews import ReviewIn, ReviewOut, InstructorReviewsOut
@@ -6,7 +7,7 @@ from model.users import User
 from model.instructors import Instructor
 from core.db import CreateDBSession
 from util.enum import BookingStatus
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import selectinload
 import error
 
 
@@ -56,8 +57,8 @@ class ReviewOp:
 
             # Fetch the review with relationships loaded for serialization
             review_with_relations = db.query(Review).options(
-                joinedload(Review.reviewer),
-                joinedload(Review.reviewed_instructor).joinedload(Instructor.user)
+                selectinload(Review.reviewer),
+                selectinload(Review.reviewed_instructor).selectinload(Instructor.user)
             ).filter(Review.id == new_review.id).first()
 
             if not review_with_relations:
@@ -76,78 +77,104 @@ class ReviewOp:
             )
 
     @staticmethod
-    def get_reviews_for_instructor(instructor_id: str) -> list[ReviewOut]:
+    def get_reviews_for_instructor(instructor_id: str) -> List[ReviewOut]:
         """Get all reviews for a specific instructor"""
         with CreateDBSession() as db:
             reviews = db.query(Review).options(
-                joinedload(Review.reviewer),
-                joinedload(Review.reviewed_instructor).joinedload(Instructor.user)
+                selectinload(Review.reviewer),
+                selectinload(Review.reviewed_instructor).selectinload(Instructor.user)
             ).filter(
                 Review.reviewed_instructor_id == instructor_id
             ).all()
 
-            # Manually construct ReviewOut objects to avoid DetachedInstanceError
-            result = []
-            for review in reviews:
-                review_out = ReviewOut(
+            # Use list comprehension for efficient construction
+            return [
+                ReviewOut(
                     id=review.id,
                     rating=review.rating,
                     comment=review.comment,
-                    reviewer=review.reviewer,  # Already loaded
+                    reviewer=review.reviewer,
                     reviewed_instructor=InstructorReviewsOut.from_instructor(review.reviewed_instructor)
                 )
-                result.append(review_out)
-            return result
+                for review in reviews
+            ]
 
     @staticmethod
-    def get_user_reviews(user_id: str) -> list[ReviewOut]:
+    def get_user_reviews(user_id: str) -> List[ReviewOut]:
         """Get all reviews given by a specific user"""
         with CreateDBSession() as db:
             reviews = db.query(Review).options(
-                joinedload(Review.reviewer),
-                joinedload(Review.reviewed_instructor).joinedload(Instructor.user)
+                selectinload(Review.reviewer),
+                selectinload(Review.reviewed_instructor).selectinload(Instructor.user)
             ).filter(
                 Review.reviewer_user_id == user_id
             ).all()
 
-            # Manually construct ReviewOut objects to avoid DetachedInstanceError
-            result = []
-            for review in reviews:
-                review_out = ReviewOut(
+            # Use list comprehension for efficient construction
+            return [
+                ReviewOut(
                     id=review.id,
                     rating=review.rating,
                     comment=review.comment,
-                    reviewer=review.reviewer,  # Already loaded
+                    reviewer=review.reviewer,
                     reviewed_instructor=InstructorReviewsOut.from_instructor(review.reviewed_instructor)
                 )
-                result.append(review_out)
-            return result
+                for review in reviews
+            ]
 
     @staticmethod
-    def get_completed_bookings_for_user(user_id: str) -> list[dict]:
+    def get_completed_bookings_for_user(user_id: str) -> List[Dict[str, Any]]:
         """Get completed bookings for a user that can be reviewed"""
         with CreateDBSession() as db:
+            # Get all completed bookings for the user
             bookings = db.query(InstructorBooking).filter(
                 InstructorBooking.user_id == user_id,
                 InstructorBooking.status == BookingStatus.completed.value
             ).all()
 
-            result = []
-            for booking in bookings:
-                # Check if already reviewed this booking
-                existing_review = db.query(Review).filter(
-                    Review.reviewer_user_id == user_id,
-                    Review.booking_id == booking.id
-                ).first()
+            if not bookings:
+                return []
 
-                instructor = User.get_user_by_id(str(booking.instructor_id))
-                result.append({
+            # Get booking IDs for review check
+            booking_ids = [b.id for b in bookings]
+
+            # Batch check which bookings have reviews using subquery
+            reviewed_booking_ids = {
+                r.booking_id for r in db.query(Review.booking_id).filter(
+                    Review.reviewer_user_id == user_id,
+                    Review.booking_id.in_(booking_ids)
+                ).all()
+            }
+
+            # Get instructor IDs and batch load instructors
+            instructor_ids = list(set(str(b.instructor_id) for b in bookings))
+            instructors = {
+                str(inst.id): inst for inst in db.query(User).filter(
+                    User.id.in_(instructor_ids)
+                ).all()
+            }
+
+            # Use list comprehension for efficient construction
+            return [
+                {
                     "booking_id": booking.id,
                     "instructor_id": booking.instructor_id,
-                    "instructor_name": f"{instructor.full_name.split('-')[0]} {instructor.full_name.split('-')[1]}",
+                    "instructor_name": ReviewOp._format_instructor_name(
+                        instructors.get(str(booking.instructor_id))
+                    ),
                     "booking_type": booking.booking_type.value,
                     "scheduled_datetime": booking.scheduled_datetime,
-                    "already_reviewed": existing_review is not None
-                })
+                    "already_reviewed": booking.id in reviewed_booking_ids
+                }
+                for booking in bookings
+            ]
 
-            return result
+    @staticmethod
+    def _format_instructor_name(instructor: User) -> str:
+        """Helper method to format instructor name from full_name"""
+        if not instructor or not instructor.full_name:
+            return "Unknown Instructor"
+
+        # Split by '-' and reconstruct as "First Last"
+        parts = instructor.full_name.split('-')
+        return f"{parts[0]} {parts[1] if len(parts) > 1 else ''}".strip()
