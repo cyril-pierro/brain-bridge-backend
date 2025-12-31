@@ -7,6 +7,7 @@ from uuid import UUID
 
 from service.auth import verify_access_token_ws, verify_access_token
 from controller.teams import TeamsOp
+from controller.users import UserOp
 from schema.chat import ChatMessage, FileMessage
 from service.chat.connection_manager import ConnectionManager
 from model.teams import Team
@@ -28,111 +29,123 @@ async def chat_websocket(
     WebSocket endpoint for team chat.
     Query parameter: token (JWT token for authentication)
     """
+    # Authenticate user
+    if not token:
+        await websocket.close(code=1008, reason="Authentication token required")
+        return
+
     try:
-        # Authenticate user
-        if not token:
-            await websocket.close(code=1008, reason="Authentication token required")
+        auth_data = verify_access_token_ws(token)
+        user_id = auth_data.get("user_id")
+        if not user_id:
+            await websocket.close(code=1008, reason="Invalid authentication")
+            return
+    except Exception as e:
+        logger.error(f"Authentication failed: {e}")
+        await websocket.close(code=1008, reason="Authentication failed")
+        return
+
+    # Verify team membership
+    try:
+        team = Team.get_team_by_id(team_id)
+        if not team:
+            await websocket.close(code=1008, reason="Team not found")
             return
 
-        try:
-            auth_data = verify_access_token_ws(token)
-            user_id = auth_data.get("user_id")
-            if not user_id:
-                await websocket.close(code=1008, reason="Invalid authentication")
-                return
-        except Exception as e:
-            logger.error(f"Authentication failed: {e}")
-            await websocket.close(code=1008, reason="Authentication failed")
+        # Check if user is a member of the team
+        is_member = any(str(member.id) == user_id for member in team.students)
+        is_creator = str(team.creator_id) == user_id
+
+        if not (is_member or is_creator):
+            await websocket.close(code=1008, reason="Not a team member")
             return
 
-        # Verify team membership
-        try:
-            from model.teams import Team
-            team = Team.get_team_by_id(team_id)
-            if not team:
-                await websocket.close(code=1008, reason="Team not found")
-                return
+    except Exception as e:
+        logger.error(f"Team verification failed: {e}")
+        await websocket.close(code=1008, reason="Team access denied")
+        return
 
-            # Check if user is a member of the team
-            is_member = any(str(member.id) == user_id for member in team.students)
-            is_creator = str(team.creator_id) == user_id
+    # Get user's first name for join/leave messages
+    user_obj = UserOp.get_user_by_id(user_id)
+    first_name = user_obj.full_name.split()[0] if user_obj and user_obj.full_name else "A team member"
 
-            if not (is_member or is_creator):
-                await websocket.close(code=1008, reason="Not a team member")
-                return
+    # Accept connection and join room
+    await manager.connect(websocket, team_id, user_id, first_name)
 
-        except Exception as e:
-            logger.error(f"Team verification failed: {e}")
-            await websocket.close(code=1008, reason="Team access denied")
-            return
+    try:
+        while True:
+            # Receive message from client
+            data = await websocket.receive_text()
+            message_data = json.loads(data)
 
-        # Accept connection and join room
-        await manager.connect(websocket, team_id, user_id)
+            # Validate message structure
+            if not isinstance(message_data, dict):
+                continue
 
-        try:
-            while True:
-                # Receive message from client
-                data = await websocket.receive_text()
-                message_data = json.loads(data)
+            message_type = message_data.get("type")
 
-                # Validate message structure
-                if not isinstance(message_data, dict):
+            if message_type == "chat_message":
+                # Handle text message
+                content = message_data.get("content", "").strip()
+                if not content:
                     continue
 
-                message_type = message_data.get("type")
+                # Get user's first name
+                user_obj = UserOp.get_user_by_id(user_id)
+                first_name = user_obj.full_name.split()[0] if user_obj and user_obj.full_name else "User"
 
-                if message_type == "chat_message":
-                    # Handle text message
-                    content = message_data.get("content", "").strip()
-                    if not content:
-                        continue
+                # Create message object
+                message = ChatMessage(
+                    type="chat_message",
+                    user_id=user_id,
+                    content=content,
+                    timestamp=datetime.utcnow().isoformat()
+                )
 
-                    # Create message object
-                    message = ChatMessage(
-                        type="chat_message",
-                        user_id=user_id,
-                        content=content,
-                        timestamp=datetime.utcnow().isoformat()
-                    )
+                # Broadcast to team room with user name
+                message_dict = message.model_dump()
+                message_dict["user_name"] = first_name
+                await manager.broadcast_to_room(team_id, message_dict)
 
-                    # Broadcast to team room
-                    await manager.broadcast_to_room(team_id, message.model_dump())
+            elif message_type == "file_shared":
+                # Handle file sharing notification
+                file_data = message_data.get("file")
+                if not file_data:
+                    continue
 
-                elif message_type == "file_shared":
-                    # Handle file sharing notification
-                    file_data = message_data.get("file")
-                    if not file_data:
-                        continue
+                # Create file message object
+                file_message = FileMessage(
+                    type="file_shared",
+                    user_id=user_id,
+                    file=file_data,
+                    timestamp=datetime.utcnow().isoformat()
+                )
 
-                    # Create file message object
-                    file_message = FileMessage(
-                        type="file_shared",
-                        user_id=user_id,
-                        file=file_data,
-                        timestamp=datetime.utcnow().isoformat()
-                    )
+                # Broadcast to team room
+                await manager.broadcast_to_room(team_id, file_message.model_dump())
 
-                    # Broadcast to team room
-                    await manager.broadcast_to_room(team_id, file_message.model_dump())
+            elif message_type == "typing":
+                # Handle typing indicators
+                is_typing = message_data.get("is_typing", False)
+                # Get user's first name
+                user_obj = UserOp.get_user_by_id(user_id)
+                first_name = user_obj.full_name.split()[0] if user_obj and user_obj.full_name else "Someone"
+                typing_message = {
+                    "type": "typing",
+                    "user_id": user_id,
+                    "user_name": first_name,
+                    "is_typing": is_typing,
+                    "timestamp": datetime.utcnow().isoformat()
+                }
+                await manager.broadcast_to_room(team_id, typing_message, exclude_user=user_id)
 
-                elif message_type == "typing":
-                    # Handle typing indicators
-                    is_typing = message_data.get("is_typing", False)
-                    typing_message = {
-                        "type": "typing",
-                        "user_id": user_id,
-                        "is_typing": is_typing,
-                        "timestamp": datetime.utcnow().isoformat()
-                    }
-                    await manager.broadcast_to_room(team_id, typing_message, exclude_user=user_id)
-
-        except WebSocketDisconnect:
-            logger.info(f"User {user_id} disconnected from team {team_id}")
-        except Exception as e:
-            logger.error(f"Error in chat websocket: {e}")
-        finally:
-            # Clean up connection
-            manager.disconnect(team_id, user_id)
+    except WebSocketDisconnect:
+        logger.info(f"User {user_id} disconnected from team {team_id}")
+    except Exception as e:
+        logger.error(f"Error in chat websocket: {e}")
+    finally:
+        # Clean up connection
+        await manager.disconnect(team_id, user_id, first_name)
 
 
 @router.get("/teams/{team_id}/chat/status")

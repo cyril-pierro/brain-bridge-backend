@@ -2,6 +2,7 @@ from typing import Dict, List, Set
 import logging
 from fastapi import WebSocket
 import json
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ class ConnectionManager:
         # room_id -> set of (websocket, user_id) tuples
         self.active_connections: Dict[int, Set[tuple[WebSocket, str]]] = {}
 
-    async def connect(self, websocket: WebSocket, room_id: int, user_id: str):
+    async def connect(self, websocket: WebSocket, room_id: int, user_id: str, user_name: str = None):
         """
         Connect a user to a team chat room.
         """
@@ -42,12 +43,30 @@ class ConnectionManager:
             {
                 "type": "user_joined",
                 "user_id": user_id,
-                "timestamp": "now"
+                "user_name": user_name or "A team member",
+                "timestamp": datetime.utcnow().isoformat()
             },
             exclude_user=user_id
         )
 
-    def disconnect(self, room_id: int, user_id: str):
+        # Broadcast updated online count to all users in the room
+        await self._broadcast_online_count(room_id)
+
+    async def _broadcast_online_count(self, room_id: int):
+        """
+        Broadcast the current online count to all users in the room.
+        """
+        count = self.get_room_online_count(room_id)
+        await self.broadcast_to_room(
+            room_id,
+            {
+                "type": "online_count",
+                "count": count,
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        )
+
+    async def disconnect(self, room_id: int, user_id: str, user_name: str = None):
         """
         Disconnect a user from a team chat room.
         """
@@ -63,6 +82,20 @@ class ConnectionManager:
                 del self.active_connections[room_id]
 
             logger.info(f"User {user_id} disconnected from team chat room {room_id}")
+
+            # Notify others that user left
+            await self.broadcast_to_room(
+                room_id,
+                {
+                    "type": "user_left",
+                    "user_id": user_id,
+                    "user_name": user_name or "A team member",
+                    "timestamp": datetime.utcnow().isoformat()
+                }
+            )
+
+            # Broadcast updated online count to remaining users
+            await self._broadcast_online_count(room_id)
 
     async def broadcast_to_room(self, room_id: int, message: dict, exclude_user: str = None):
         """

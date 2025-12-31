@@ -18,11 +18,12 @@ from service.email import MailService
 from util.enum import SubscriptionType, UserRole
 from service.auth import verify_access_token, TokenManager
 from schema import SuccessOut
-from service.redis import Redis
+from service.redis import Redis, AsyncRedis
 from config.setting import settings
 
 
-redis_instance = Redis()
+redis_instance = AsyncRedis()
+sync_redis_instance = Redis()
 
 router = APIRouter(tags=["users"])
 
@@ -182,7 +183,7 @@ def logout(auth_data: dict = Depends(verify_access_token)):
     # It will expire naturally
 
     for key in cache_keys_to_clear:
-        redis_instance.delete(key)
+        sync_redis_instance.delete(key)
 
     return {"message": "Logged out successfully"}
 
@@ -280,7 +281,7 @@ def subscribe(
 
     # Invalidate cache when subscription changes
     cache_key = f"user_subscription:{user_id}"
-    redis_instance.delete(cache_key)
+    sync_redis_instance.delete(cache_key)
 
     return {"subscription": subscription.type.value if subscription.type else None}
 
@@ -297,7 +298,7 @@ def get_subscription(token: dict = Depends(verify_access_token)):
     # Try to get from cache first
     cache_key = f"user_subscription:{user_id}"
 
-    cached_result = redis_instance.get_json(cache_key)
+    cached_result = sync_redis_instance.get_json(cache_key)
     if cached_result:
         return cached_result
 
@@ -310,7 +311,7 @@ def get_subscription(token: dict = Depends(verify_access_token)):
         result = {"subscription": subscription.type.value}
 
     # Cache the result for 10 minutes
-    redis_instance.set_json(cache_key, result, expiry=600)
+    sync_redis_instance.set_json(cache_key, result, expiry=600)
 
     return result
 
